@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>大阪核帳認領頁</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #dbe3ee;
+      --accent: #2563eb;
+      --accent-2: #eff6ff;
+      --ok: #059669;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+    .wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+    .sub {
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+    }
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .amount {
+      font-size: 28px;
+      font-weight: 800;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    button, .pill {
+      border: 1px solid var(--line);
+      background: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--accent); }
+    .pill {
+      cursor: default;
+      color: var(--muted);
+      background: #fafcff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #f8fbff;
+      z-index: 1;
+      text-align: left;
+      font-size: 13px;
+      color: #374151;
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    tbody td {
+      padding: 10px;
+      border-bottom: 1px solid #edf2f7;
+      vertical-align: top;
+      font-size: 14px;
+    }
+    tbody tr:hover { background: #fafcff; }
+    tbody tr.checked { background: var(--accent-2); }
+    input[type="text"], select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #cfd8e3;
+      border-radius: 8px;
+      font-size: 14px;
+      background: white;
+    }
+    .money {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #4338ca;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .footer-note {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    @media (max-width: 900px) {
+      .table-wrap { overflow-x: auto; }
+      table { min-width: 980px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>大阪核帳認領頁</h1>
+    <div class="sub">勾選要認領的項目後，頁面會自動統計總金額。每筆可填寫認領人、備註，也可依類別做人工分派。</div>
+
+    <div class="summary">
+      <div class="card">
+        <h3>已勾選筆數</h3>
+        <div class="amount" id="selectedCount">0</div>
+      </div>
+      <div class="card">
+        <h3>已勾選總額（JPY）</h3>
+        <div class="amount" id="sumJPY">¥0</div>
+      </div>
+      <div class="card">
+        <h3>已勾選總額（TWD 原生）</h3>
+        <div class="amount" id="sumTWD">NT$0</div>
+      </div>
+      <div class="card">
+        <h3>JPY 換算 TWD（匯率 0.2028）</h3>
+        <div class="amount" id="sumJPYToTWD">NT$0</div>
+      </div>
+      <div class="card">
+        <h3>已認領筆數</h3>
+        <div class="amount" id="claimedCount">0</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button id="checkAllBtn">全選</button>
+      <button id="clearAllBtn">全部取消</button>
+      <button id="claimedOnlyBtn">只看已填認領人</button>
+      <button id="showAllBtn">顯示全部</button>
+      <span class="pill">欄位已移除：類別(日)、項目/店名(日)</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:60px;">勾選</th>
+            <th style="width:120px;">日期</th>
+            <th style="width:140px;">類別</th>
+            <th>項目 / 店名</th>
+            <th style="width:110px;">金額</th>
+            <th style="width:140px;">換算台幣</th>
+            <th style="width:90px;">幣別</th>
+            <th style="width:160px;">認領人</th>
+            <th style="width:220px;">備註</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="footer-note">
+      備註：日文欄位已完全移除，JPY 以 0.2028 換算顯示台幣。若之後要加「依認領人分組統計」或「匯出 CSV」，我可以再補上。
+    </div>
+  </div>
+
+  <script>
+    const rows = [
+      { date: '2026/02/23-03/02', category: '交通', item: '機票電子收據', amount: null, currency: '-', note: '憑證文件' },
+      { date: '2026/02/23-03/02', category: '交通', item: '機票行程單', amount: null, currency: '-', note: '憑證文件' },
+      { date: '2026/03/02', category: '交通', item: '台中捷運單程票 3 張', amount: 120, currency: 'TWD', note: '高鐵臺中站' },
+      { date: '2026/02/23-03/02', category: '交通', item: '高鐵票', amount: null, currency: '-', note: '憑證文件' },
+      { date: '2026/02/23-03/02', category: '交通', item: '機場接送', amount: null, currency: '-', note: '憑證文件' },
+      { date: '2026/02/23-03/02', category: '住宿', item: '住宿預訂確認_6253779198', amount: null, currency: '-', note: '憑證文件' },
+      { date: '2026/02/23-03/02', category: '保險', item: '旅平險', amount: null, currency: '-', note: '憑證文件' },
+      { date: '2026/02/23-03/02', category: '娛樂', item: '環球影城門票 / 環球門票', amount: null, currency: '-', note: '憑證文件' },
+      { date: '2026/02/23-03/02', category: '餐飲', item: '環球內史努比用餐', amount: null, currency: '-', note: '憑證文件' },
+      { date: '2026/02/27', category: '餐飲/採買', item: 'Life 超市 弁天町店', amount: 1320, currency: 'JPY', note: '實體收據已辨識' },
+      { date: '2026/02/28', category: '藥妝/保健品', item: '鶴羽藥妝 心齋橋筋二丁目店', amount: 54245, currency: 'JPY', note: '免稅，PayPay' },
+      { date: '2026/02/28', category: '食品/日用品', item: 'Bic 酒販 難波店', amount: 12467, currency: 'JPY', note: '免稅，PayPay' },
+      { date: '2026/03/01', category: '藥妝/日用品', item: '杉藥局 LINKS UMEDA 店', amount: 9040, currency: 'JPY', note: '實體收據已辨識' },
+      { date: '2026/03/01', category: '動漫商品', item: 'Lashinbang 大阪梅田店', amount: 5105, currency: 'JPY', note: '實體收據已辨識' },
+      { date: '2026/03/01', category: '餐飲/採買', item: 'Life 超市 弁天町店', amount: 5366, currency: 'JPY', note: '實體收據已辨識' },
+      { date: '2026/03/01', category: '日用品/購物', item: 'MEGA 唐吉訶德 弁天町店', amount: 3467, currency: 'JPY', note: '實體收據已辨識' },
+      { date: '2026/03/02', category: '伴手禮', item: '關西旅日記 POPUP 北', amount: 9240, currency: 'JPY', note: '實體收據已辨識' },
+      { date: '2026/02/27', category: '娛樂', item: '日本環球影城', amount: 5151, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/27', category: '娛樂', item: '日本環球影城', amount: 1958, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/27', category: '娛樂', item: '日本環球影城', amount: 1368, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/27', category: '娛樂', item: '日本環球影城', amount: 1546, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/27', category: '娛樂', item: '日本環球影城', amount: 690, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/27', category: '娛樂', item: '日本環球影城', amount: 325, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/27', category: '餐飲', item: 'VIE DE FRANCE 弁天町店', amount: 183, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/27', category: '待確認', item: 'DB（店名待確認）', amount: 2834, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/27', category: '餐飲/採買', item: 'Life 超市', amount: 1627, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/27', category: '餐飲/採買', item: 'Life 超市', amount: 268, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/27', category: '餐飲/採買', item: 'Life 超市', amount: 1075, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/28', category: '文具/購物', item: 'Ikeman 船場店', amount: 2358, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/28', category: '藥妝', item: '大國藥妝', amount: 1564, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/28', category: '日用品', item: '大創', amount: 45, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/28', category: '日用品', item: '大創', amount: 22, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/28', category: '藥妝/保健品', item: 'Tsuruha', amount: 11001, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/28', category: '藥妝/保健品', item: 'Tsuruha', amount: 420, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/28', category: '飲料', item: '伊藤園', amount: 23, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/28', category: '飲料', item: '伊藤園', amount: 29, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/28', category: '飲料', item: '伊藤園', amount: 47, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/28', category: '3C/購物', item: 'Bic Camera / Bic 酒販', amount: 2529, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/28', category: '餐飲', item: '麥當勞', amount: 116, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/02/28', category: '動漫商品', item: 'Animate', amount: 1157, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/03/01', category: '待確認', item: 'DB（店名待確認）', amount: 1616, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/03/01', category: '購物', item: 'LINKS UMEDA', amount: 319, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/03/01', category: '餐飲', item: '麥當勞', amount: 271, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/03/01', category: '購物', item: '阪急三番街', amount: 4842, currency: 'TWD', note: 'PayPay' },
+      { date: '2026/03/01', category: '餐飲/日用品', item: '全家便利商店', amount: 252, currency: 'TWD', note: 'PayPay' }
+    ];
+
+    const tbody = document.getElementById('tbody');
+    const selectedCountEl = document.getElementById('selectedCount');
+    const sumJPYEl = document.getElementById('sumJPY');
+    const sumTWDEl = document.getElementById('sumTWD');
+    const sumJPYToTWDEl = document.getElementById('sumJPYToTWD');
+    const claimedCountEl = document.getElementById('claimedCount');
+    const JPY_TO_TWD = 0.2028;
+
+    function money(amount, currency) {
+      if (amount == null) return '<span class="small">-</span>';
+      return currency === 'JPY'
+        ? `¥${amount.toLocaleString('zh-TW')}`
+        : currency === 'TWD'
+        ? `NT$${amount.toLocaleString('zh-TW')}`
+        : `${amount}`;
+    }
+
+    function convertedTWD(amount, currency) {
+      if (amount == null) return '<span class="small">-</span>';
+      if (currency === 'JPY') return `NT$${Math.round(amount * JPY_TO_TWD).toLocaleString('zh-TW')}`;
+      if (currency === 'TWD') return `NT$${amount.toLocaleString('zh-TW')}`;
+      return '<span class="small">-</span>';
+    }
+
+    function render(data = rows) {
+      tbody.innerHTML = '';
+      data.forEach((row, index) => {
+        const tr = document.createElement('tr');
+        tr.dataset.index = index;
+        tr.innerHTML = `
+          <td><input type="checkbox" class="row-check" /></td>
+          <td>${row.date}</td>
+          <td><span class="tag">${row.category}</span></td>
+          <td>${row.item}</td>
+          <td class="money">${money(row.amount, row.currency)}</td>
+          <td class="money">${convertedTWD(row.amount, row.currency)}</td>
+          <td>${row.currency}</td>
+          <td><input type="text" class="claimer" placeholder="請填姓名" /></td>
+          <td><input type="text" class="memo" value="${row.note || ''}" /></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      bindEvents();
+      updateSummary();
+    }
+
+    function updateSummary() {
+      const trs = [...tbody.querySelectorAll('tr')];
+      let selectedCount = 0;
+      let claimedCount = 0;
+      let sumJPY = 0;
+      let sumTWD = 0;
+      let sumJPYToTWD = 0;
+
+      trs.forEach(tr => {
+        const checked = tr.querySelector('.row-check').checked;
+        const claimer = tr.querySelector('.claimer').value.trim();
+        const amountText = tr.children[4].innerText.replace(/[¥NT$,]/g, '');
+        const currency = tr.children[6].innerText.trim();
+        const amount = Number(amountText) || 0;
+
+        tr.classList.toggle('checked', checked);
+
+        if (checked) {
+          selectedCount++;
+          if (currency === 'JPY') {
+            sumJPY += amount;
+            sumJPYToTWD += amount * JPY_TO_TWD;
+          }
+          if (currency === 'TWD') sumTWD += amount;
+        }
+        if (claimer) claimedCount++;
+      });
+
+      selectedCountEl.textContent = selectedCount;
+      claimedCountEl.textContent = claimedCount;
+      sumJPYEl.textContent = `¥${sumJPY.toLocaleString('zh-TW')}`;
+      sumTWDEl.textContent = `NT$${sumTWD.toLocaleString('zh-TW')}`;
+      sumJPYToTWDEl.textContent = `NT$${Math.round(sumJPYToTWD).toLocaleString('zh-TW')}`;
+    }
+
+    function bindEvents() {
+      tbody.querySelectorAll('.row-check, .claimer').forEach(el => {
+        el.addEventListener('input', updateSummary);
+        el.addEventListener('change', updateSummary);
+      });
+    }
+
+    document.getElementById('checkAllBtn').addEventListener('click', () => {
+      tbody.querySelectorAll('.row-check').forEach(cb => cb.checked = true);
+      updateSummary();
+    });
+
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+      tbody.querySelectorAll('.row-check').forEach(cb => cb.checked = false);
+      updateSummary();
+    });
+
+    document.getElementById('claimedOnlyBtn').addEventListener('click', () => {
+      [...tbody.querySelectorAll('tr')].forEach(tr => {
+        const hasClaimer = tr.querySelector('.claimer').value.trim();
+        tr.style.display = hasClaimer ? '' : 'none';
+      });
+    });
+
+    document.getElementById('showAllBtn').addEventListener('click', () => {
+      [...tbody.querySelectorAll('tr')].forEach(tr => tr.style.display = '');
+    });
+
+    render();
+  </script>
+</body>
+</html>
