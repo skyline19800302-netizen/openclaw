@@ -152,7 +152,7 @@
 <body>
   <div class="wrap">
     <h1>大阪核帳認領頁</h1>
-    <div class="sub">勾選項目後頁面會自動統計總金額。若原本是 PDF 憑證但尚未填金額，可直接在表格內補上；每筆也可設定數量，系統會依 4 人平均拆帳並顯示每人金額。</div>
+    <div class="sub">勾選項目後頁面會自動統計總金額。物品依原始資料逐列列出，不做整合；若判定為重覆的一對，則兩筆皆排除。若原本是 PDF 憑證但尚未填金額，可直接在表格內補上；每筆也可設定數量，系統會依 4 人平均拆帳並顯示每人金額。</div>
 
     <div class="summary">
       <div class="card">
@@ -184,6 +184,7 @@
       <button id="showAllBtn">顯示全部</button>
       <span class="pill">4 人拆帳模式</span>
       <span class="pill">欄位已移除：類別(日)、項目/店名(日)、認領人</span>
+      <span class="pill">列示規則：逐列列出，不整合；重覆兩筆皆排除</span>
     </div>
 
     <div class="table-wrap">
@@ -207,7 +208,7 @@
     </div>
 
     <div class="footer-note">
-      備註：日文欄位與認領人欄位已移除，JPY 以 0.2028 換算顯示台幣。若 PDF 憑證尚未填金額，可直接在表格內補；每筆依 4 人平均拆帳，若某筆不是 4 人份，可自行調整數量欄位。
+      備註：日文欄位與認領人欄位已移除，JPY 以 0.2028 換算顯示台幣。物品依原始資料逐列列出，不做整合；若發現為重覆的一對，兩筆皆不列入。若 PDF 憑證尚未填金額，可直接在表格內補；每筆依 4 人平均拆帳，若某筆不是 4 人份，可自行調整數量欄位。
     </div>
   </div>
 
@@ -220,7 +221,6 @@
       { date: '2026/02/23-03/02', category: '交通', item: '機場接送', amount: 3300, currency: 'TWD', qty: 4, note: '漢聲租車送機，4 人' },
       { date: '2026/02/23-03/02', category: '住宿', item: '住宿預訂確認_6253779198', amount: 80897, currency: 'JPY', qty: 4, note: 'Booking 住宿總價，實際付款幣別 JPY（約 TWD 16,459）' },
       { date: '2026/02/23-03/02', category: '保險', item: '旅平險', amount: 2339, currency: 'TWD', qty: 4, note: '4 人旅平險保費總計' },
-      { date: '2026/02/23-03/02', category: '娛樂', item: '環球影城門票 / 環球門票', amount: 7263, currency: 'TWD', qty: 4, note: 'Klook 收據：3 成人 + 1 兒童，票券檔無獨立金額' },
       { date: '2026/02/23-03/02', category: '餐飲', item: '環球內史努比用餐', amount: 5200, currency: 'JPY', qty: 4, note: 'Snoopy’s Backlot Café，手機點餐總額' },
       { date: '2026/02/27', category: '餐飲/採買', item: 'Life 超市 弁天町店', amount: 1320, currency: 'JPY', qty: 4, note: '實體收據已辨識', qty: 4 },
       { date: '2026/02/28', category: '藥妝/保健品', item: '鶴羽藥妝 心齋橋筋二丁目店', amount: 54245, currency: 'JPY', note: '免稅，PayPay', qty: 4 },
@@ -250,7 +250,6 @@
       { date: '2026/02/28', category: '飲料', item: '伊藤園', amount: 23, currency: 'TWD', note: 'PayPay', qty: 4 },
       { date: '2026/02/28', category: '飲料', item: '伊藤園', amount: 29, currency: 'TWD', note: 'PayPay', qty: 4 },
       { date: '2026/02/28', category: '飲料', item: '伊藤園', amount: 47, currency: 'TWD', note: 'PayPay', qty: 4 },
-      { date: '2026/02/28', category: '3C/購物', item: 'Bic Camera / Bic 酒販', amount: 2529, currency: 'TWD', note: 'PayPay', qty: 4 },
       { date: '2026/02/28', category: '餐飲', item: '麥當勞', amount: 116, currency: 'TWD', note: 'PayPay', qty: 4 },
       { date: '2026/02/28', category: '動漫商品', item: 'Animate', amount: 1157, currency: 'TWD', note: 'PayPay', qty: 4 },
       { date: '2026/03/01', category: '待確認', item: 'DB（店名待確認）', amount: 1616, currency: 'TWD', note: 'PayPay', qty: 4 },
